@@ -1,17 +1,5 @@
 .jumbotron {
-  margin-top: 30px;
-}
-
-.mt0 {
-  margin-top: 0;
-}
-
-.mt10 {
-  margin-top: 10px;
-}
-
-.mb10 {
-	margin-bottom: 10px !important;
+	margin-top: 2rem;
 }
 
 .jumbotron p.list-group-item-text {
