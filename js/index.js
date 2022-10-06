@@ -47,7 +47,7 @@ function search_wikipedia() {
 			if (data['query'] !== undefined) {
 				var searchResults = document.querySelector('#search-results');
 
-				searchResults.innerHTML = '<h3 class="mb-2">Results:</h3>';
+				searchResults.innerHTML = '<h3 class="mb-2">Search results:</h3>';
 
 				for (let [key, value] of Object.entries(data['query']['pages'])) {
 					searchResults.innerHTML += '<div class="list-group mb-2"><a class="list-group-item" href="' + value['fullurl'] + '" target="_blank"><h4 class="list-group-item-heading">' + value['title'] + '</h4><p class="list-group-item-text">' + value['extract'] + '</p></a></div>';
