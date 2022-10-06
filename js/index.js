@@ -1,38 +1,73 @@
-$(document).ready(function() {
-	$('#search-submit').click(function() {
+var offset = 0;
+
+document.addEventListener('DOMContentLoaded', (event) => {
+	document.querySelector('#search-submit').addEventListener('click', (event) => {
 		offset = 0
-		searchWikipedia();
+		search_wikipedia();
 	});
 
-	$('#search-pagination .previous').click(function() {
+	document.querySelector('#search-pagination .previous').addEventListener('click', (event) => {
+		event.preventDefault();
+
 		if (offset != 0) {
 			offset -= 10;
-			searchWikipedia();
+			search_wikipedia();
+
+			window.scrollTo({
+				top: 0,
+				left: 0,
+				behavior: 'smooth'
+			});
 		}
 	});
 
-	$('#search-pagination .next').click(function() {
+	document.querySelector('#search-pagination .next').addEventListener('click', (event) => {
+		event.preventDefault();
+
 		offset += 10;
-		searchWikipedia();
+		search_wikipedia();
+
+		window.scrollTo({
+			top: 0,
+			left: 0,
+			behavior: 'smooth'
+		});
 	});
 });
 
-var offset = 0;
+function search_wikipedia() {
+	if (document.querySelector('input[name="search"]').reportValidity()) {
+		fetch('https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*&generator=search&prop=extracts&exsentences=1&exintro&explaintext&exlimit=max&gsroffset=' + offset + '&gsrsearch=' + document.querySelector('input[name="search"]').value, {
+			'method': 'GET'
+		})
+		.then((response) => {
+			if (response.ok) {
+				return response.json();
+			} else {
+				throw 'Error';
+			}
+		})
+		.then((data) => {
+			if (data['query'] !== undefined) {
+				var searchResults = document.querySelector('#search-results');
 
-function searchWikipedia() {
-	$.getJSON('https://en.wikipedia.org/w/api.php?action=query&format=json&generator=search&prop=extracts&exsentences=1&exintro&explaintext&exlimit=max&gsroffset=' + offset + '&gsrsearch=' + $('input[name="search"]').val() + '&callback=?', function(data) {
-		var searchResults = $('#search-results');
-		searchResults.html('<h3 class="mb-2">Results:</h3>');
-		$.each(data['query']['pages'], function(index, value) {
-			searchResults.append('<div class="list-group mb-2"><a class="list-group-item" href="https://en.wikipedia.org/?curid=' + value['pageid'] + '" target="_blank"><h4 class="list-group-item-heading">' + value['title'] + '</h4><p class="list-group-item-text">' + value['extract'] + '</p></a></div>');
+				searchResults.innerHTML = '<h3 class="mb-2">Results:</h3>';
+
+				for (let [key, value] of Object.entries(data['query']['pages'])) {
+					searchResults.innerHTML += '<div class="list-group mb-2"><a class="list-group-item" href="https://en.wikipedia.org/?curid=' + value['pageid'] + '" target="_blank"><h4 class="list-group-item-heading">' + value['title'] + '</h4><p class="list-group-item-text">' + value['extract'] + '</p></a></div>';
+				}
+
+				if (offset == 0) {
+					document.querySelector('#search-pagination .previous').classList.add('disabled');
+				} else {
+					document.querySelector('#search-pagination .previous').classList.remove('disabled');
+				}
+
+				document.querySelector('#search-pagination').style.display = 'block';
+			}
+		})
+		.catch((error) => {
+			console.log(error);
 		});
-
-		if (offset == 0) {
-			$('#search-pagination .previous').addClass('disabled');
-		} else {
-			$('#search-pagination .previous').removeClass('disabled');
-		}
-
-		$('#search-pagination').show();
-	});
+	}
 }
